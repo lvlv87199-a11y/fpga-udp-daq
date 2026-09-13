@@ -7,6 +7,7 @@
 | Day 1 | 建立项目目录；编写 README 和系统模块图；创建项目 skill；初始化本地 Git；创建并连接 GitHub 远程仓库。 | 环境没有 `gh` 命令，因此通过已登录的 GitHub 页面创建远程仓库；项目 `.git` 元数据受安全权限保护，绑定远程和提交时申请了项目范围内的 Git 权限。 |
 | Day 2 | 检查并准备 WSL Ubuntu 22.04；确认 Python、Git；安装 Icarus Verilog、Verilator、GTKWave；验证版本命令。 | 初次查询 WSL 被 Windows 权限拦截，且输出存在编码问题；改用授权的 WSL 管理命令完成检查和安装。 |
 | Day 3 | 学习 FIFO 的深度、满/空、读写握手和溢出处理；实现参数化单时钟同步 FIFO；完成 Icarus 编译和 Verilator lint。 | 规格没有预先规定复位和溢出语义，因此约定使用同步低有效复位、同步读出，并将满时被拒绝的写请求报告为一个时钟周期的 `overflow` 脉冲。首次编译时 Icarus 11 对 `parameter int unsigned` 声明报语法错误，改为 `parameter integer`；Verilator 的位宽警告则通过显式的指针末值和深度常量修正。 |
+| Day 4 | 编写最小 SystemVerilog testbench；验证复位、空读、连续写入、满状态、溢出脉冲、顺序读取和复位恢复；生成 VCD。 | 当前测试没有阻塞问题；波形查看依赖 WSLg 或可用的图形显示环境，VCD 文件本身已由仿真生成。 |
 
 ## Day 3 设计约定
 
