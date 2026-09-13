@@ -62,6 +62,12 @@ gtkwave sim/sync_fifo_tb.vcd
 wsl.exe -d Ubuntu-22.04 -- bash -lc "cd /mnt/d/mywork/fpga-udp-daq && bash sim/run_fifo_tb.sh"
 ```
 
+Day 5 采样器 smoke test：
+
+```bash
+bash sim/run_sample_generator_tb.sh
+```
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -72,4 +78,5 @@ wsl.exe -d Ubuntu-22.04 -- bash -lc "cd /mnt/d/mywork/fpga-udp-daq && bash sim/r
 - [x] Day 2：WSL 工具链安装与版本检查
 - [x] Day 3：参数化同步 FIFO RTL
 - [x] Day 4：FIFO 最小 testbench 与 VCD 波形
-- [ ] Day 5 及以后：RTL、自动化验证与 Vivado 分析
+- [x] Day 5：valid/ready 递增采样器
+- [ ] Day 6 及以后：RTL、自动化验证与 Vivado 分析

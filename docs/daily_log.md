@@ -8,6 +8,7 @@
 | Day 2 | 检查并准备 WSL Ubuntu 22.04；确认 Python、Git；安装 Icarus Verilog、Verilator、GTKWave；验证版本命令。 | 初次查询 WSL 被 Windows 权限拦截，且输出存在编码问题；改用授权的 WSL 管理命令完成检查和安装。 |
 | Day 3 | 学习 FIFO 的深度、满/空、读写握手和溢出处理；实现参数化单时钟同步 FIFO；完成 Icarus 编译和 Verilator lint。 | 规格没有预先规定复位和溢出语义，因此约定使用同步低有效复位、同步读出，并将满时被拒绝的写请求报告为一个时钟周期的 `overflow` 脉冲。首次编译时 Icarus 11 对 `parameter int unsigned` 声明报语法错误，改为 `parameter integer`；Verilator 的位宽警告则通过显式的指针末值和深度常量修正。 |
 | Day 4 | 编写最小 SystemVerilog testbench；验证复位、空读、连续写入、满状态、溢出脉冲、顺序读取和复位恢复；生成并分析 VCD。 | 当前测试没有阻塞问题；波形查看依赖 WSLg 或可用的图形显示环境，VCD 文件本身已由仿真生成。 |
+| Day 5 | 学习 `valid/ready` 数据流握手；实现 16-bit 参数化递增采样器；支持 `enable` 和可配置分频；完成 Icarus 编译、Verilator lint 和 smoke test。 | 需要明确 `enable` 与握手的关系：当一个样本已经 `valid` 时，即使 `enable` 拉低，也必须保持该样本直到 `ready` 接收，避免违反 valid/ready 协议。 |
 
 ## Day 3 设计约定
 
@@ -113,6 +114,16 @@ empty=1, full=0, overflow=0, count=0
 满时写入 = do_write=0 且 overflow=1
 读完全部数据 = dout 依次为 0x11、0x22、0x33、0x44，随后 empty=1
 ```
+
+## Day 5 设计约定
+
+- 文件：`rtl/sample_generator.sv`
+- `sample_valid=1` 表示 `sample_data` 有效；只有 `sample_valid && sample_ready` 时才算一次成功传输。
+- `sample_ready=0` 时，`sample_valid` 和 `sample_data` 保持不变，形成标准 backpressure 行为。
+- 每次成功传输后，采样值递增 1，并等待 `sample_divider` 个空闲时钟周期再产生下一个样本。
+- `sample_divider=0` 表示使用该寄存器接口允许的最短间隔。
+- `enable=0` 时不产生新的样本；如果已有样本处于 `valid` 状态，仍保持到下游接收完成。
+- 采样值只在复位时清零，达到数据位宽上限后自然回绕。
 
 ## 后续记录规则
 
