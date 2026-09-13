@@ -41,9 +41,11 @@ tb/       cocotb 与其他 testbench
 sim/      仿真脚本和波形
 scripts/  数据生成、解析和性能统计
 vivado/   综合、实现和时序约束脚本
-docs/     规格、测试和分析报告
+docs/     规格、测试、分析报告和每日记录
 pcb/      可选的 AD 概念性硬件资料
 ```
+
+每日进度记录见 [`docs/daily_log.md`](docs/daily_log.md)。
 
 ## 当前范围
 
@@ -53,4 +55,5 @@ pcb/      可选的 AD 概念性硬件资料
 
 - [x] Day 1：项目目录与总体目标
 - [x] Day 2：WSL 工具链安装与版本检查
-- [ ] Day 3 及以后：RTL、自动化验证与 Vivado 分析
+- [x] Day 3：参数化同步 FIFO RTL
+- [ ] Day 4 及以后：RTL 测试、自动化验证与 Vivado 分析
