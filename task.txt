@@ -1,0 +1,110 @@
+下面是一份按“每天 2–3 小时、30 天完成”的任务清单。项目固定为：**无硬件的 FPGA 采集数据经 UDP 打包发送系统**。你现有的 Windows Vivado、WSL 和 AD 已足够；前 24 天完全不依赖开发板，AD 只在最后一周作为单板硬件方向的可选加分项。:codex-annotation{index="1"}
+
+最终你会得到一个自己的 GitHub 项目，包含 RTL、自动化验证、波形、综合及时序报告、性能测试和可选的 PCB 设计资料。
+
+## 第 0 天：建立项目目标
+
+项目名建议：`fpga-udp-daq`
+
+目标：
+
+`模拟 ADC 数据 → FIFO 缓冲 → UDP 数据帧打包 → 软件端解析并校验连续性`
+
+先不直接接入 LiteX/LiteEth：它们学习曲线较陡。先把核心 RTL 和验证做到完整，再在第 25 天起选择性接入 LiteX；这样更符合数字 IC / FPGA 面试项目的呈现逻辑。
+
+建议目录：
+
+```text
+fpga-udp-daq/
+  rtl/          # SystemVerilog RTL
+  tb/           # cocotb 测试
+  sim/          # 仿真脚本与波形
+  scripts/      # Python 数据生成/解析/性能统计
+  vivado/       # 综合、时序约束、Tcl
+  docs/         # 规格、接口、测试、报告
+  pcb/          # 可选：AD 工程输出
+```
+
+## 第 1 周：环境、规格与基础 RTL
+
+| 天数 | 阅读 / 学习 | 动手完成 | 下载或参考 |
+|---|---|---|---|
+| Day 1 | 了解同步设计、模块化 RTL 和仿真流程。 | 创建 GitHub 仓库与上述目录；写 `README.md`，明确项目目标和模块图。 | [Git](https://git-scm.com/downloads)、[GitHub Docs](https://docs.github.com/) |
+| Day 2 | 学习 SystemVerilog 的 `always_ff`、`always_comb`、参数化、`logic`。 | 在 WSL 安装 Python、Git、Icarus Verilog、Verilator、GTKWave；确认 `iverilog -V`、`verilator --version` 可运行。 | [Icarus Verilog](https://github.com/steveicarus/iverilog)、[Verilator](https://verilator.org/guide/latest/)、[GTKWave](https://gtkwave.sourceforge.net/) |
+| Day 3 | 学习 FIFO：深度、满/空、读写握手、溢出处理。 | 写 `rtl/sync_fifo.sv`：参数化位宽与深度，输出 `full`、`empty`、`overflow`。 | [Clifford Cummings FIFO 论文](https://www.sunburst-design.com/papers/CummingsSNUG2002SJ_FIFO1.pdf) |
+| Day 4 | 学习 testbench 时钟、复位、波形定位。 | 用 SystemVerilog 写最小 testbench，验证 FIFO 的写入、读取、满/空状态；导出 VCD，用 GTKWave 查看。 | [GTKWave 教程](https://gtkwave.github.io/gtkwave/) |
+| Day 5 | 学习数据流接口的 `valid/ready` 握手。 | 写 `rtl/sample_generator.sv`：16-bit 递增采样器，支持 `enable` 与可配置分频。 | [AXI Stream 介绍](https://developer.arm.com/documentation/ihi0051/latest/) |
+| Day 6 | 学习寄存器映射与 FPGA 外设控制基本思路。 | 写 `rtl/daq_ctrl.sv`：实现 `enable`、采样分频、每包采样数、状态寄存器的简单寄存器接口。先自定义接口，不必一开始上 AXI。 | [LiteX CSR 文档](https://github.com/enjoy-digital/litex/wiki/CSR-Bus-and-Register-Access) |
+| Day 7 | 复盘前 6 天内容。 | 完成 `docs/spec_v1.md`：模块功能、时钟/复位、采样格式、寄存器表、异常处理策略。提交第一个 Git tag：`v0.1-spec`。 | 无需新增下载 |
+
+第 1 周验收：能在 GTKWave 中看到“采样器产生递增数据，FIFO 正确存取”。
+
+## 第 2 周：采集通路与自动化验证
+
+| 天数 | 阅读 / 学习 | 动手完成 | 下载或参考 |
+|---|---|---|---|
+| Day 8 | 学习有限状态机设计与状态转移覆盖。 | 写 `rtl/packetizer.sv`：将 FIFO 数据分组成固定长度 payload，例如每包 256 个 16-bit 样本。 | [SystemVerilog 设计规范](https://verilogpro.com/systemverilog-design-tutorials/) |
+| Day 9 | 学习帧格式、帧头、序号、长度字段的用途。 | 定义自有 DAQ 帧格式：魔数、帧序号、样本计数、payload 长度、采样数据、校验字段。写入 `docs/packet_format.md`。 | [UDP 协议 RFC 768](https://www.rfc-editor.org/rfc/rfc768) |
+| Day 10 | 学习 checksum/CRC 的工程意义。 | 在 `packetizer` 中增加简单 XOR checksum；输入停止时应能正确输出最后一个完整帧。 | [CRC 介绍](https://barrgroup.com/blog/crc-series-part-1-additive-checksums) |
+| Day 11 | 学习 cocotb 的协程、驱动器、监视器和断言。 | 在 WSL 安装 cocotb；为 `sync_fifo` 编写首个 cocotb 测试。 | [cocotb 官方文档](https://docs.cocotb.org/) |
+| Day 12 | 学习随机测试的意义。 | 为 FIFO 加入随机读写测试，验证数据顺序；覆盖“满时继续写”和“空时继续读”。 | [cocotb 示例](https://github.com/cocotb/cocotb/tree/master/examples) |
+| Day 13 | 学习 scoreboard/reference model 思路。 | 用 Python 编写 `scripts/reference_packet.py`，根据输入样本生成预期数据帧。 | [Python struct 文档](https://docs.python.org/3/library/struct.html) |
+| Day 14 | 学习测试覆盖矩阵如何写。 | 为 `packetizer` 写 cocotb 测试：包长、帧序号、payload 顺序、checksum、尾包策略。更新 `docs/testplan.md`。 | 无需新增下载 |
+
+第 2 周验收：自动测试能验证至少 1,000 个连续样本，且能主动制造 FIFO 溢出并记录错误计数。
+
+## 第 3 周：做成完整采集子系统
+
+| 天数 | 阅读 / 学习 | 动手完成 | 下载或参考 |
+|---|---|---|---|
+| Day 15 | 学习顶层集成与接口分层。 | 写 `rtl/daq_top.sv`，连接 `sample_generator`、`sync_fifo`、`packetizer`、`daq_ctrl`。 | 无需新增下载 |
+| Day 16 | 学习计数器溢出、复位时序和异常恢复。 | 加入统计寄存器：产生样本数、发送帧数、FIFO overflow 次数、checksum 错误次数。 | [RTL Coding Guidelines](https://github.com/lowRISC/style-guides/blob/master/VerilogCodingStyle.md) |
+| Day 17 | 学习 backpressure：下游变慢时系统如何处理。 | 在 testbench 中随机拉低输出 `ready`，确认 packetizer 不丢样、不乱序；记录最大 FIFO 水位。 | [ready/valid 握手说明](https://fpgacpu.ca/fpga/handshake.html) |
+| Day 18 | 学习时钟域跨越的基本风险。 | 阅读异步 FIFO 原理；本日不必实现。写一份 `docs/cdc_note.md`，说明若 ADC 时钟与系统时钟不同，该如何改成异步 FIFO。 | [CDC 论文](https://www.sunburst-design.com/papers/CummingsSNUG2008Boston_CDC.pdf) |
+| Day 19 | 学习吞吐率计算。 | 写 Python 脚本，统计理论采样带宽、帧开销和有效数据率；比较 256、512、736 样本/帧。 | [Ethernet MTU 说明](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
+| Day 20 | 学习 UDP payload 与 MTU 关系。 | 将每帧数据限制在典型以太网 MTU 内，推荐 payload 不超过 1472 bytes；输出一张“包长—协议开销—有效带宽”表。 | [RFC 1122](https://www.rfc-editor.org/rfc/rfc1122) |
+| Day 21 | 阶段复盘。 | 输出 `docs/integration_report.md`，附系统框图、主要波形、测试通过率、已知限制。打 tag：`v0.2-sim`。 | 无需新增下载 |
+
+第 3 周验收：完整系统在仿真中运行，Python 可以解析输出帧并验证“无丢样、无错序、无错误 checksum”。
+
+## 第 4 周：Vivado 综合、时序与优化
+
+| 天数 | 阅读 / 学习 | 动手完成 | 下载或参考 |
+|---|---|---|---|
+| Day 22 | 学习综合与实现的区别，理解 LUT、FF、BRAM、时钟频率。 | 在 Windows Vivado 新建 RTL Project，导入你的 `.sv` 文件和 `daq_top.sv`。选择一个你已安装支持的器件；不要为了本项目额外安装板卡文件。 | [Vivado Design Suite 用户指南索引](https://docs.amd.com/r/en-US/ug901-vivado-synthesis) |
+| Day 23 | 学习 XDC 时钟约束。 | 写 `vivado/daq_top.xdc`，添加一个主时钟约束，例如 100 MHz；运行 Synthesis，保存资源利用率报告。 | [XDC 约束指南](https://docs.amd.com/r/en-US/ug903-vivado-using-constraints) |
+| Day 24 | 学习 setup/hold slack 和关键路径。 | 运行 Implementation；记录 WNS、TNS、关键路径、LUT/FF/BRAM 使用量，写入 `docs/timing_baseline.md`。 | [Vivado 时序分析指南](https://docs.amd.com/r/en-US/ug906-vivado-design-analysis) |
+| Day 25 | 学习如何降低组合逻辑深度。 | 优化 packetizer：将复杂组合计算改为流水寄存器或分阶段状态机；再次综合，对比优化前后时序。 | [AMD FPGA Pipeline 技术说明](https://docs.amd.com/r/en-US/ug949-vivado-design-methodology) |
+| Day 26 | 学习 RAM 推断与资源权衡。 | 将 FIFO 分别尝试为寄存器实现和 RAM 推断实现；比较资源与时序，写 `docs/power_area_timing_tradeoff.md`。 | [Vivado RAM 推断](https://docs.amd.com/r/en-US/ug901-vivado-synthesis) |
+| Day 27 | 学习 lint、可综合 RTL 风格和可复现构建。 | 整理 Vivado Tcl 脚本：新建工程、导入文件、综合、实现、导出报告。确保别人按 README 能复现。 | [Vivado Tcl 命令参考](https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands) |
+| Day 28 | 复盘 PPA。 | 写 `docs/ppr_report.md`：优化前后资源、最高目标频率、WNS、关键路径原因和采取的优化。 | [OpenROAD](https://github.com/The-OpenROAD-Project/OpenROAD)，仅作后端方向扩展阅读，不要求安装 |
+
+第 4 周验收：你有可信的 Vivado 综合/实现结果，而不只是“写了 RTL”。
+
+## 第 5 周：可选 LiteX 与单板硬件扩展
+
+这一周不是完成项目的必要条件。时间有限时，优先完善前四周的文档和测试。
+
+| 天数 | 阅读 / 学习 | 动手完成 | 下载或参考 |
+|---|---|---|---|
+| Day 29 | 了解 LiteX 和 LiteEth 的 SoC/以太网架构。 | 阅读其示例，决定是否把自研模块包成 LiteX 外设；不要求当日集成成功。 | [LiteX](https://github.com/enjoy-digital/litex)、[LiteEth](https://github.com/enjoy-digital/liteeth) |
+| Day 30 | 学习 FPGA + PHY + ADC 单板结构。 | 用 AD 画“概念性”顶层原理图：FPGA、千兆 PHY、RJ45、ADC、DDR3、DC/DC；在 `pcb/` 输出 PDF。不要布板或下单。 | [OrangeCrab Hardware](https://github.com/orangecrab-fpga/orangecrab-hardware)、[open_covg_daq_pcb](https://github.com/lucask07/open_covg_daq_pcb) |
+
+## 最终交付清单
+
+完成后，你的仓库至少应有：
+
+- `docs/spec_v1.md`：需求、模块框图、寄存器表。
+- `docs/packet_format.md`：帧格式与字节序。
+- `rtl/`：采样器、FIFO、打包器、控制模块、顶层模块。
+- `tb/`：cocotb 自动化测试。
+- 波形截图：正常采集、背压、FIFO 溢出、包边界。
+- `docs/testplan.md`：测试项与结果。
+- Vivado 的综合、利用率、实现和时序报告。
+- `docs/power_area_timing_tradeoff.md`：至少一项明确的 RTL 优化对比。
+- `README.md`：环境、运行命令、结果截图和架构图。
+- 可选：AD 原理图 PDF、PCB 设计约束表和 SI/PI 风险清单。
+
+简历中可写：
+
+> 独立设计并验证 FPGA 数据采集与 UDP 打包 IP，完成 16-bit 采样数据生成、FIFO 缓冲、可配置帧打包与错误统计；基于 cocotb 构建自动化验证，覆盖背压、FIFO 溢出与数据完整性场景；使用 Vivado 完成综合、布局布线和时序优化，并输出资源与 PPA 对比报告。
