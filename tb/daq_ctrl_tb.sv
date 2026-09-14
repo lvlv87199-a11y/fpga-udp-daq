@@ -10,6 +10,9 @@ module daq_ctrl_tb;
     logic [31:0] wdata;
     logic [31:0] rdata;
     logic        rd_valid;
+    logic        sample_event;
+    logic        frame_event;
+    logic        checksum_error_event;
     logic        enable;
     logic [15:0] sample_divider;
     logic [15:0] samples_per_packet;
@@ -29,7 +32,10 @@ module daq_ctrl_tb;
         .sample_divider     (sample_divider),
         .samples_per_packet (samples_per_packet),
         .fifo_full          (fifo_full),
-        .fifo_overflow      (fifo_overflow)
+        .fifo_overflow      (fifo_overflow),
+        .sample_event       (sample_event),
+        .frame_event        (frame_event),
+        .checksum_error_event(checksum_error_event)
     );
 
     always #5 clk = ~clk;
@@ -70,6 +76,9 @@ module daq_ctrl_tb;
         wdata         = '0;
         fifo_full     = 1'b0;
         fifo_overflow = 1'b0;
+        sample_event  = 1'b0;
+        frame_event   = 1'b0;
+        checksum_error_event = 1'b0;
 
         repeat (2) @(posedge clk);
         #1;
@@ -93,10 +102,32 @@ module daq_ctrl_tb;
         read_reg(8'h00, 32'h1);
         read_reg(8'h04, 32'd7);
         read_reg(8'h08, 32'd512);
+        read_reg(8'h10, 32'd0);
+        read_reg(8'h14, 32'd0);
+        read_reg(8'h18, 32'd0);
+        read_reg(8'h1c, 32'd0);
 
         fifo_full     = 1'b1;
         fifo_overflow = 1'b1;
         read_reg(8'h0c, 32'h7);
+        fifo_full     = 1'b0;
+        fifo_overflow = 1'b0;
+
+        // One event of each type must increment the corresponding counter.
+        @(negedge clk);
+        sample_event         = 1'b1;
+        frame_event          = 1'b1;
+        checksum_error_event = 1'b1;
+        @(posedge clk);
+        #1;
+        sample_event         = 1'b0;
+        frame_event          = 1'b0;
+        checksum_error_event = 1'b0;
+
+        read_reg(8'h10, 32'd1);
+        read_reg(8'h14, 32'd1);
+        read_reg(8'h18, 32'd1);
+        read_reg(8'h1c, 32'd1);
 
         // A zero packet length must be ignored.
         write_reg(8'h08, 32'd0);

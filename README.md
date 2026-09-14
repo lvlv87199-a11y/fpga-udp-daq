@@ -114,6 +114,13 @@ Day 15 顶层集成测试：
 bash sim/run_daq_top_cocotb.sh
 ```
 
+Day 16 统计寄存器测试：
+
+```bash
+bash sim/run_daq_ctrl_tb.sh
+bash sim/run_daq_top_cocotb.sh
+```
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -135,4 +142,5 @@ bash sim/run_daq_top_cocotb.sh
 - [x] Day 13：Python DAQ 帧参考模型
 - [x] Day 14：packetizer cocotb 覆盖矩阵
 - [x] Day 15：daq_top 单时钟链路集成
-- [ ] Day 16 及以后：统计计数、压力测试与 Vivado 分析
+- [x] Day 16：样本/帧/溢出/checksum 错误统计寄存器
+- [ ] Day 17 及以后：压力测试、CDC 与 Vivado 分析

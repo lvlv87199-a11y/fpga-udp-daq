@@ -10,6 +10,10 @@
 | `0x0c` | `STATUS` | RO | bit 0 `enable` | 当前使能状态。 |
 |  |  |  | bit 1 `fifo_full` | FIFO 满状态输入。 |
 |  |  |  | bit 2 `fifo_overflow` | FIFO 溢出输入。 |
+| `0x10` | `SAMPLE_COUNT` | RO | 31:0 | 成功写入 FIFO 的样本事件累计数。 |
+| `0x14` | `FRAME_COUNT` | RO | 31:0 | checksum 握手完成后的 packet 事件累计数。 |
+| `0x18` | `FIFO_OVERFLOW_COUNT` | RO | 31:0 | FIFO 满时被拒绝写入事件累计数。 |
+| `0x1c` | `CHECKSUM_ERROR_COUNT` | RO | 31:0 | 外部 checksum 校验错误事件累计数。 |
 
 ## 接口约定
 
@@ -18,3 +22,4 @@
 - 未映射地址读回 0，未映射地址写入无副作用。
 - 复位为同步低有效复位 `rst_n`。
 - 当前版本不提供写响应、读错误码或 AXI 通道；后续需要接入 SoC 时再包装为 AXI-Lite/CSR 接口。
+- 四个统计寄存器在同步复位时清零，收到对应事件时每次加一，达到 `0xffffffff` 后自然回绕；当前不提供软件清零或饱和模式。

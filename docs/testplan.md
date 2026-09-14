@@ -35,6 +35,7 @@ bash sim/run_packetizer_tb.sh
 | P08 | 帧序号 | 参考模型生成 `frame_seq=0/1` | 大端序号字段正确 | PASS（参考模型） |
 | P09 | packetizer RTL 帧序号 | 当前 packetizer 无帧头/序号端口 | 待后续帧头接口集成 | BLOCKED（接口未实现） |
 | T01 | daq_top 控制链路 | 通过寄存器配置分频和包长，采集 0–7 并输出两包 | 控制、采样器、FIFO、packetizer 端到端顺序正确 | PASS |
+| T02 | 统计寄存器 | 注入样本、帧、FIFO overflow、checksum error 事件 | 四个 32-bit 计数器分别加一并可读回 | PASS |
 
 ## 4. 尾包策略
 
@@ -46,4 +47,5 @@ bash sim/run_packetizer_tb.sh
 - 参考模型能够验证帧头、样本大端序和 XOR16 checksum；
 - P09 在 packetizer 增加帧头/序号接口后补测；
 - T01 验证 `daq_ctrl -> sample_generator -> sync_fifo -> packetizer` 的单时钟连接；
+- T02 验证 Day 16 的四类事件计数器及同步复位默认值；
 - 测试失败时，断言应指出数据、last、checksum 或状态不匹配位置。

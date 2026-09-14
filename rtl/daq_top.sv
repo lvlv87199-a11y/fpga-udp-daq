@@ -16,6 +16,7 @@ module daq_top #(
     input  logic [31:0]           ctrl_wdata,
     output logic [31:0]           ctrl_rdata,
     output logic                  ctrl_rd_valid,
+    input  logic                  checksum_error_event,
 
     output logic                  sample_valid,
     output logic                  fifo_full,
@@ -60,7 +61,10 @@ module daq_top #(
         .sample_divider     (ctrl_sample_divider),
         .samples_per_packet (ctrl_samples_per_packet),
         .fifo_full          (fifo_full),
-        .fifo_overflow      (fifo_overflow)
+        .fifo_overflow      (fifo_overflow),
+        .sample_event       (fifo_wr_en),
+        .frame_event        (packet_done),
+        .checksum_error_event(checksum_error_event)
     );
 
     sample_generator #(

@@ -13,7 +13,7 @@ async def write_reg(dut, addr, value):
     dut.ctrl_wr_en.value = 0
 
 
-async def read_reg(dut, addr, expected):
+async def read_reg(dut, addr, expected=None):
     await FallingEdge(dut.clk)
     dut.ctrl_addr.value = addr
     dut.ctrl_rd_en.value = 1
@@ -21,7 +21,18 @@ async def read_reg(dut, addr, expected):
     await Timer(1, units="ns")
     dut.ctrl_rd_en.value = 0
     assert int(dut.ctrl_rd_valid.value) == 1
-    assert int(dut.ctrl_rdata.value) == expected
+    value = int(dut.ctrl_rdata.value)
+    if expected is not None:
+        assert value == expected
+    return value
+
+
+async def pulse_checksum_error(dut):
+    await FallingEdge(dut.clk)
+    dut.checksum_error_event.value = 1
+    await RisingEdge(dut.clk)
+    await Timer(1, units="ns")
+    dut.checksum_error_event.value = 0
 
 
 @cocotb.test()
@@ -33,6 +44,7 @@ async def test_daq_top_controlled_data_path(dut):
     dut.ctrl_rd_en.value = 0
     dut.ctrl_addr.value = 0
     dut.ctrl_wdata.value = 0
+    dut.checksum_error_event.value = 0
     dut.payload_ready.value = 0
     dut.checksum_ready.value = 0
 
@@ -90,6 +102,21 @@ async def test_daq_top_controlled_data_path(dut):
     await RisingEdge(dut.clk)
     await Timer(1, units="ns")
     assert int(dut.busy.value) == 0
+
+    generated_samples = await read_reg(dut, 0x10)
+    sent_frames = await read_reg(dut, 0x14)
+    fifo_overflows = await read_reg(dut, 0x18)
+    assert generated_samples >= 8
+    assert sent_frames >= 2
+    assert fifo_overflows == 0
+
+    await pulse_checksum_error(dut)
+    checksum_errors = await read_reg(dut, 0x1C)
+    assert checksum_errors == 1
     dut._log.info(
-        "PASS: daq_top control -> sample_generator -> FIFO -> packetizer path"
+        "PASS: daq_top path and statistics: samples=%d frames=%d fifo_overflows=%d checksum_errors=%d",
+        generated_samples,
+        sent_frames,
+        fifo_overflows,
+        checksum_errors,
     )
