@@ -12,6 +12,10 @@
 
 完整 UDP 传输头、真实 ADC、以太网 PHY 和跨时钟域逻辑属于后续版本。
 
+Day 20 的帧长约束：在典型 1500-byte Ethernet MTU、IPv4 和 UDP 条件下，单个
+UDP payload 上限按 1472 bytes 处理。DAQ 应用帧包含 16-byte header 和 2-byte
+XOR16 checksum，因此当前 16-bit 样本格式最多允许 727 samples/frame。
+
 ## 2. 系统模块图
 
 ```text
@@ -101,6 +105,8 @@
 - 写入未映射地址无副作用。
 - 读取未映射地址返回 0。
 - 写入 `SAMPLES_PER_PACKET=0` 被忽略，保持原值。
+- 写入 `SAMPLES_PER_PACKET>727` 被忽略，保持原值，以保证 DAQ 应用帧不超过
+  1472-byte IPv4/UDP payload 限制。
 - 当前接口不提供写响应、错误码或 AXI 通道。
 - v1 不约定同一周期同时读写同一地址；软件应一次只发起一个请求。
 - 四个统计计数器在同步复位时清零，事件到来时加一，32-bit 溢出后自然回绕。

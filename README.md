@@ -136,6 +136,18 @@ python3 scripts/throughput_report.py --self-test
 python3 scripts/throughput_report.py
 ```
 
+Day 20 MTU/UDP payload 限制与带宽表：
+
+```bash
+python3 scripts/throughput_report.py --self-test
+python3 scripts/throughput_report.py
+```
+
+默认按 Ethernet MTU 1500、IPv4 20 字节、UDP 8 字节计算，UDP payload 上限为
+1472 字节。DAQ 应用帧还包含 16 字节帧头和 2 字节 checksum，因此 16-bit
+样本的安全上限为 727 个/帧；`daq_ctrl` 会拒绝 728 及以上的配置。报告仍保留
+736 个/帧作为越界对照项。详细表格见 [`docs/mtu_report.md`](docs/mtu_report.md)。
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -161,4 +173,5 @@ python3 scripts/throughput_report.py
 - [x] Day 17：随机 ready 背压与 FIFO 最大水位
 - [x] Day 18：ADC 时钟域与系统时钟域 CDC 说明
 - [x] Day 19：采样带宽、帧开销与有效数据率分析
-- [ ] Day 20 及以后：MTU、集成报告与 Vivado 分析
+- [x] Day 20：MTU/UDP payload 限制与包长—协议开销—有效带宽表
+- [ ] Day 21 及以后：集成报告与 Vivado 分析

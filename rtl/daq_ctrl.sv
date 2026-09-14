@@ -37,6 +37,10 @@ module daq_ctrl #(
     localparam logic [ADDR_WIDTH-1:0] ADDR_FRAME_COUNT         = 8'h14;
     localparam logic [ADDR_WIDTH-1:0] ADDR_FIFO_OVERFLOW_COUNT = 8'h18;
     localparam logic [ADDR_WIDTH-1:0] ADDR_CHECKSUM_ERR_COUNT  = 8'h1c;
+    // IPv4/UDP over a 1500-byte Ethernet MTU leaves 1472 bytes for UDP.
+    // The DAQ application frame consumes 16 header bytes and 2 checksum
+    // bytes, so 727 16-bit samples is the largest safe configuration.
+    localparam logic [15:0] MAX_SAMPLES_PER_PACKET = 16'd727;
 
     logic [DATA_WIDTH-1:0] status_value;
     logic [31:0] sample_count;
@@ -91,9 +95,10 @@ module daq_ctrl #(
                     end
 
                     ADDR_SAMPLES_PER_PACKET: begin
-                        // Zero is rejected so the packetizer never receives
-                        // an impossible packet length.
-                        if (wdata[15:0] != 16'd0) begin
+                        // Reject zero and any application frame that would
+                        // exceed the configured IPv4/UDP payload limit.
+                        if ((wdata[15:0] != 16'd0) &&
+                            (wdata[15:0] <= MAX_SAMPLES_PER_PACKET)) begin
                             samples_per_packet <= wdata[15:0];
                         end
                     end

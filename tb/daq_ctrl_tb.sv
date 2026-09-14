@@ -135,6 +135,17 @@ module daq_ctrl_tb;
             $fatal(1, "Zero packet length was not rejected");
         end
 
+        // A 16-bit DAQ frame has 18 bytes of application overhead. Keep the
+        // complete application frame within the 1472-byte UDP payload.
+        write_reg(8'h08, 32'd727);
+        if (samples_per_packet !== 16'd727) begin
+            $fatal(1, "MTU-safe maximum packet length was not accepted");
+        end
+        write_reg(8'h08, 32'd728);
+        if (samples_per_packet !== 16'd727) begin
+            $fatal(1, "Oversized packet length was not rejected");
+        end
+
         read_reg(8'hfc, 32'd0);
 
         $display("PASS: daq_ctrl register read/write/status checks");

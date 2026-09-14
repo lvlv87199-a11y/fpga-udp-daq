@@ -6,7 +6,7 @@
 |---:|---|:---:|---|---|
 | `0x00` | `CONTROL` | RW | bit 0 `enable` | 采样器使能；其他位保留。 |
 | `0x04` | `SAMPLE_DIVIDER` | RW | bit 15:0 | 采样分频值，复位值为 0。 |
-| `0x08` | `SAMPLES_PER_PACKET` | RW | bit 15:0 | 每包采样数，复位值为 256；写入 0 会被忽略。 |
+| `0x08` | `SAMPLES_PER_PACKET` | RW | bit 15:0 | 每包采样数，复位值为 256；写入 0 或大于 727 会被忽略。 |
 | `0x0c` | `STATUS` | RO | bit 0 `enable` | 当前使能状态。 |
 |  |  |  | bit 1 `fifo_full` | FIFO 满状态输入。 |
 |  |  |  | bit 2 `fifo_overflow` | FIFO 溢出输入。 |

@@ -23,6 +23,7 @@
 | Day 17 | 学习 ready/valid backpressure；新增随机拉低 `payload_ready`/`checksum_ready` 的顶层测试，并记录 FIFO 最大水位。 | 采用固定随机种子验证 64 个连续样本和 8 个 packet；新增 `sync_fifo.level`/`daq_top.fifo_level` 只读观测信号，不改变 FIFO 读写语义。测试通过：最大水位 8、payload 背压 46 次、checksum 背压 3 次、FIFO overflow 0。 |
 | Day 18 | 学习时钟域跨越风险和异步 FIFO 原理；编写 `docs/cdc_note.md`，说明 ADC 时钟与系统时钟不同时时钟域、指针、复位和状态信号的处理方式。 | 本日按计划不实现异步 FIFO；明确使用 Gray 指针、双触发器同步、双口 RAM 和各域本地 `full/empty`，并列出后续 CDC 验证项目。 |
 | Day 19 | 学习采样带宽、帧率、协议开销和有效数据率；新增 `scripts/throughput_report.py`，比较 256、512、736 样本/帧。 | 默认按 1 MSPS、16 bit、每帧 42 字节 Ethernet+IPv4+UDP 开销计算；线速率分别为 17.875、16.938、16.652 Mbit/s，有效率分别为 89.510%、94.465%、96.084%；736 样本应用帧为 1490 字节，脚本提示其超过 1472-byte UDP/IPv4 payload 限制。 |
+| Day 20 | 学习 UDP payload 与 Ethernet MTU 的关系；将 DAQ 每帧配置限制在典型 IPv4/UDP payload 上限内；更新吞吐率脚本并输出 MTU 对比表。 | 1500-byte MTU 减去 IPv4 20 字节和 UDP 8 字节后得到 1472-byte payload；DAQ 帧头和 checksum 共占 18 字节，因此 16-bit 样本安全上限为 727 个/帧。`daq_ctrl` 接受 727、拒绝 728 及以上；报告保留 736 作为越界对照。未新增统一 `daq_top` 波形，按本日文档要求暂不实现。 |
 
 ## Day 3 设计约定
 
