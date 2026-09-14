@@ -46,6 +46,30 @@ D:\mywork\fpga-udp-daq\vivado\daq_top_project\fpga_udp_daq.xpr
 本次 Day22 已使用并验证器件 `xc7a100tcsg324-1`，工程已经生成并通过 Vivado
 批处理创建检查。
 
+## 3. Day23 添加时钟约束并综合
+
+`daq_top.xdc` 为顶层 `clk` 添加 100 MHz 约束：
+
+```tcl
+create_clock -name sys_clk -period 10.000 [get_ports clk]
+```
+
+已有工程可在 Vivado Tcl Shell 或批处理模式中加入约束：
+
+```powershell
+D:\apps\vivado\Vivado\2017.4\bin\vivado.bat -mode batch -nolog -nojournal -notrace -source D:\mywork\fpga-udp-daq\vivado\add_constraints.tcl
+```
+
+运行综合并生成资源利用率报告：
+
+```powershell
+D:\apps\vivado\Vivado\2017.4\bin\vivado.bat -mode batch -nolog -nojournal -notrace -source D:\mywork\fpga-udp-daq\vivado\run_synthesis.tcl
+```
+
+报告输出到 `vivado/reports/utilization_synth.rpt` 和
+`vivado/reports/utilization_synth_flat.rpt`。本日只执行 Synthesis，Implementation
+和 WNS/TNS 时序分析留到后续 Day24。
+
 如果工程目录已经存在，脚本默认停止以避免覆盖；确认需要重建时才使用：
 
 ```powershell

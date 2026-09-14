@@ -160,6 +160,12 @@ Vivado 工程脚本和操作说明见 [`vivado/README.md`](vivado/README.md) 与
 源文件并设置 `daq_top` 为顶层；器件 part 需先从本机 Vivado 器件库查询，Day23
 再添加 XDC 时钟约束。
 
+Day 23 Vivado 时钟约束与综合：
+
+使用 [`vivado/daq_top.xdc`](vivado/daq_top.xdc) 约束 `clk` 为 100 MHz，运行
+[`vivado/run_synthesis.tcl`](vivado/run_synthesis.tcl) 生成资源利用率报告；结果
+记录见 [`docs/resource_utilization_synth.md`](docs/resource_utilization_synth.md)。
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -188,4 +194,5 @@ Vivado 工程脚本和操作说明见 [`vivado/README.md`](vivado/README.md) 与
 - [x] Day 20：MTU/UDP payload 限制与包长—协议开销—有效带宽表
 - [x] Day 21：仿真阶段集成报告与 `v0.2-sim` 标签
 - [x] Day 22：Vivado RTL Project 创建脚本与源文件导入说明
-- [ ] Day 23 及以后：XDC、综合、实现与时序分析
+- [x] Day 23：100 MHz XDC 时钟约束、Vivado Synthesis 与资源报告
+- [ ] Day 24 及以后：Implementation、WNS/TNS 与时序分析

@@ -59,12 +59,18 @@ set rtl_files [list \
     [file join $repo_root rtl daq_top.sv] \
 ]
 
+set xdc_file [file join $repo_root vivado daq_top.xdc]
+
 foreach rtl_file $rtl_files {
     if {![file exists $rtl_file]} {
         puts "ERROR: missing RTL source: $rtl_file"
         exit 5
     }
     add_files -fileset sources_1 -norecurse $rtl_file
+}
+
+if {[file exists $xdc_file]} {
+    add_files -fileset constrs_1 -norecurse $xdc_file
 }
 
 set_property top daq_top [current_fileset]
@@ -75,5 +81,6 @@ puts "Created Vivado project: [file join $project_dir ${project_name}.xpr]"
 puts "Target part: $part"
 puts "Top module: daq_top"
 puts "RTL source count: [llength $rtl_files]"
+puts "Clock constraint: [expr {[file exists $xdc_file] ? $xdc_file : {none}}]"
 
 close_project
