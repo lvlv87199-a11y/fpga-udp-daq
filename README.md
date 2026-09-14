@@ -99,6 +99,15 @@ python3 scripts/reference_packet.py --self-test
 python3 scripts/reference_packet.py --frame-seq 7 0x1234 0xabcd
 ```
 
+Day 14 packetizer cocotb 覆盖测试：
+
+```bash
+bash sim/run_packetizer_cocotb.sh
+python3 scripts/reference_packet.py --self-test
+```
+
+测试矩阵见 [`docs/testplan.md`](docs/testplan.md)。当前 packetizer 尚未输出帧头和 `frame_seq`，该项暂由参考模型验证，RTL 接口集成后补测。
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -118,4 +127,5 @@ python3 scripts/reference_packet.py --frame-seq 7 0x1234 0xabcd
 - [x] Day 11：cocotb FIFO 协程测试
 - [x] Day 12：FIFO 随机读写与参考队列检查
 - [x] Day 13：Python DAQ 帧参考模型
-- [ ] Day 14 及以后：测试计划与 Vivado 分析
+- [x] Day 14：packetizer cocotb 覆盖矩阵
+- [ ] Day 15 及以后：顶层集成、测试计划扩展与 Vivado 分析
