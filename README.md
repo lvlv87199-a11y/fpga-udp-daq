@@ -46,6 +46,7 @@ pcb/      可选的 AD 概念性硬件资料
 ```
 
 每日进度记录见 [`docs/daily_log.md`](docs/daily_log.md)。
+当前规格见 [`docs/spec_v1.md`](docs/spec_v1.md)。
 
 ## Day 4 仿真命令
 
@@ -86,4 +87,5 @@ bash sim/run_daq_ctrl_tb.sh
 - [x] Day 4：FIFO 最小 testbench 与 VCD 波形
 - [x] Day 5：valid/ready 递增采样器
 - [x] Day 6：自定义 DAQ 控制/状态寄存器接口
-- [ ] Day 7 及以后：RTL、自动化验证与 Vivado 分析
+- [x] Day 7：v1 规格与异常处理策略
+- [ ] Day 8 及以后：RTL、自动化验证与 Vivado 分析
