@@ -15,7 +15,8 @@ module sync_fifo #(
     input  logic                  rd_en,
     output logic [DATA_WIDTH-1:0] dout,
     output logic                  empty,
-    output logic                  overflow
+    output logic                  overflow,
+    output logic [((DEPTH <= 1) ? 1 : $clog2(DEPTH + 1))-1:0] level
 );
 
     localparam integer PTR_WIDTH   = (DEPTH <= 1) ? 1 : $clog2(DEPTH);
@@ -32,6 +33,7 @@ module sync_fifo #(
 
     assign empty    = (count == '0);
     assign full     = (count == DEPTH_COUNT);
+    assign level    = count;
     assign do_read  = rd_en && !empty;
     assign do_write = wr_en && !full;
 

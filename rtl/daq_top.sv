@@ -22,6 +22,7 @@ module daq_top #(
     output logic                  fifo_full,
     output logic                  fifo_empty,
     output logic                  fifo_overflow,
+    output logic [15:0]           fifo_level,
 
     output logic                  payload_valid,
     input  logic                  payload_ready,
@@ -34,6 +35,9 @@ module daq_top #(
     output logic                  busy
 );
 
+    localparam integer FIFO_LEVEL_WIDTH =
+        (FIFO_DEPTH <= 1) ? 1 : $clog2(FIFO_DEPTH + 1);
+
     logic                  ctrl_enable;
     logic [15:0]           ctrl_sample_divider;
     logic [15:0]           ctrl_samples_per_packet;
@@ -42,6 +46,7 @@ module daq_top #(
     logic                  fifo_wr_en;
     logic [DATA_WIDTH-1:0] fifo_dout;
     logic                  fifo_rd_en;
+    logic [FIFO_LEVEL_WIDTH-1:0] fifo_level_i;
 
     // A full FIFO backpressures the generator. Therefore the normal top-level
     // data path never attempts a write that the FIFO would reject.
@@ -92,8 +97,11 @@ module daq_top #(
         .rd_en    (fifo_rd_en),
         .dout     (fifo_dout),
         .empty    (fifo_empty),
-        .overflow (fifo_overflow)
+        .overflow (fifo_overflow),
+        .level    (fifo_level_i)
     );
+
+    assign fifo_level = {{(16-FIFO_LEVEL_WIDTH){1'b0}}, fifo_level_i};
 
     packetizer #(
         .DATA_WIDTH (DATA_WIDTH),

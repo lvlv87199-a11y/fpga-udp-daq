@@ -20,6 +20,7 @@
 | Day 14 | 学习测试覆盖矩阵；为 packetizer 编写 cocotb 覆盖测试，验证包长、payload 顺序、`payload_last`、背压、checksum 和不完整尾包等待策略；新增 `docs/testplan.md`。 | 当前 packetizer 还没有帧头/`frame_seq` 端口，因此帧序号先由 Day 13 参考模型验证，并在测试计划中明确列为 RTL 后续接口项。 |
 | Day 15 | 学习顶层集成与接口分层；实现 `rtl/daq_top.sv`，连接 `daq_ctrl`、`sample_generator`、`sync_fifo` 和 `packetizer`；通过寄存器配置真实数据链路。 | 顶层用 `!fifo_full` 生成采样器 ready，避免正常数据路径向满 FIFO 发起写入；新增 cocotb 集成测试，验证配置后连续输出 0–7 两个 4-sample packet。 |
 | Day 16 | 学习事件计数器、计数器回绕和复位恢复；增加样本数、发送帧数、FIFO overflow 数和 checksum 错误数四个 32-bit 只读统计寄存器。 | `sample_event`、`frame_event` 和 `checksum_error_event` 作为事件输入，计数器同步复位并自然回绕；顶层把 FIFO 写入和 `packet_done` 接到对应统计事件，checksum 错误保留为外部输入。 |
+| Day 17 | 学习 ready/valid backpressure；新增随机拉低 `payload_ready`/`checksum_ready` 的顶层测试，并记录 FIFO 最大水位。 | 采用固定随机种子验证 64 个连续样本和 8 个 packet；新增 `sync_fifo.level`/`daq_top.fifo_level` 只读观测信号，不改变 FIFO 读写语义。测试通过：最大水位 8、payload 背压 46 次、checksum 背压 3 次、FIFO overflow 0。 |
 
 ## Day 3 设计约定
 
