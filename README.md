@@ -47,6 +47,7 @@ pcb/      可选的 AD 概念性硬件资料
 
 每日进度记录见 [`docs/daily_log.md`](docs/daily_log.md)。
 当前规格见 [`docs/spec_v1.md`](docs/spec_v1.md)。
+DAQ 帧格式见 [`docs/packet_format.md`](docs/packet_format.md)。
 
 ## Day 4 仿真命令
 
@@ -95,4 +96,5 @@ bash sim/run_packetizer_tb.sh
 - [x] Day 6：自定义 DAQ 控制/状态寄存器接口
 - [x] Day 7：v1 规格与异常处理策略
 - [x] Day 8：固定长度 payload packetizer FSM
-- [ ] Day 9 及以后：RTL、自动化验证与 Vivado 分析
+- [x] Day 9：DAQ UDP 应用帧格式
+- [ ] Day 10 及以后：RTL、自动化验证与 Vivado 分析
