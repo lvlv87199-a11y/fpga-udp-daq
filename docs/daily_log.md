@@ -24,6 +24,7 @@
 | Day 18 | 学习时钟域跨越风险和异步 FIFO 原理；编写 `docs/cdc_note.md`，说明 ADC 时钟与系统时钟不同时时钟域、指针、复位和状态信号的处理方式。 | 本日按计划不实现异步 FIFO；明确使用 Gray 指针、双触发器同步、双口 RAM 和各域本地 `full/empty`，并列出后续 CDC 验证项目。 |
 | Day 19 | 学习采样带宽、帧率、协议开销和有效数据率；新增 `scripts/throughput_report.py`，比较 256、512、736 样本/帧。 | 默认按 1 MSPS、16 bit、每帧 42 字节 Ethernet+IPv4+UDP 开销计算；线速率分别为 17.875、16.938、16.652 Mbit/s，有效率分别为 89.510%、94.465%、96.084%；736 样本应用帧为 1490 字节，脚本提示其超过 1472-byte UDP/IPv4 payload 限制。 |
 | Day 20 | 学习 UDP payload 与 Ethernet MTU 的关系；将 DAQ 每帧配置限制在典型 IPv4/UDP payload 上限内；更新吞吐率脚本并输出 MTU 对比表。 | 1500-byte MTU 减去 IPv4 20 字节和 UDP 8 字节后得到 1472-byte payload；DAQ 帧头和 checksum 共占 18 字节，因此 16-bit 样本安全上限为 727 个/帧。`daq_ctrl` 接受 727、拒绝 728 及以上；报告保留 736 作为越界对照。未新增统一 `daq_top` 波形，按本日文档要求暂不实现。 |
+| Day 21 | 完成仿真阶段集成复盘；编写 `docs/integration_report.md`，整理系统框图、主要 VCD 波形、测试通过率和已知限制；运行完整回归。 | 4/4 SystemVerilog smoke、6/6 Cocotb 用例、Python 参考模型、吞吐率自测和 Verilator lint 均通过；测试计划为 11 个可执行项 100% 通过，P09 因 packetizer 尚无帧头/序号接口保持 BLOCKED。创建阶段标签 `v0.2-sim`；按要求未新增统一 `daq_top` 波形。 |
 
 ## Day 3 设计约定
 
