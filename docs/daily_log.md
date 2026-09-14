@@ -11,6 +11,7 @@
 | Day 5 | 学习 `valid/ready` 数据流握手；实现 16-bit 参数化递增采样器；支持 `enable` 和可配置分频；完成 Icarus 编译、Verilator lint 和 smoke test。 | 需要明确 `enable` 与握手的关系：当一个样本已经 `valid` 时，即使 `enable` 拉低，也必须保持该样本直到 `ready` 接收，避免违反 valid/ready 协议。 |
 | Day 6 | 学习寄存器映射和 FPGA 外设控制；实现 `daq_ctrl` 自定义读写接口、控制寄存器和状态寄存器；完成 Icarus 编译、Verilator lint 和寄存器 smoke test。 | 为避免过早引入 AXI，先规定单周期 `wr_en/rd_en` 接口；同时明确读响应为注册输出 `rd_valid`，未映射地址读回 0，零包长写入被忽略。 |
 | Day 7 | 复盘前 6 天内容；核对 FIFO、采样器和控制寄存器的接口；编写 `docs/spec_v1.md`，统一模块、时钟复位、采样格式、寄存器和异常策略。 | 将尚未实现的 packetizer、顶层集成、CDC 和真实硬件明确列为后续范围，避免 v1 规格与当前 RTL 能力混淆。 |
+| Day 8 | 学习有限状态机和状态转移；实现固定长度 payload packetizer；处理 FIFO 同步读延迟、payload `valid/ready` 背压和 `payload_last`；完成 packetizer smoke test。 | FIFO 是同步读出，不能在发出读请求的同一时刻直接使用新数据，因此增加 `ST_READ_CAPTURE` 状态；payload 端未 ready 时保持数据和 last 不变。Verilator 首次同时检查两个 RTL 文件时报告 `MULTITOP`，改用 `--top-module packetizer` 后通过。 |
 
 ## Day 3 设计约定
 

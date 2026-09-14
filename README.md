@@ -75,6 +75,12 @@ Day 6 控制寄存器 smoke test：
 bash sim/run_daq_ctrl_tb.sh
 ```
 
+Day 8 packetizer smoke test：
+
+```bash
+bash sim/run_packetizer_tb.sh
+```
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -88,4 +94,5 @@ bash sim/run_daq_ctrl_tb.sh
 - [x] Day 5：valid/ready 递增采样器
 - [x] Day 6：自定义 DAQ 控制/状态寄存器接口
 - [x] Day 7：v1 规格与异常处理策略
-- [ ] Day 8 及以后：RTL、自动化验证与 Vivado 分析
+- [x] Day 8：固定长度 payload packetizer FSM
+- [ ] Day 9 及以后：RTL、自动化验证与 Vivado 分析
