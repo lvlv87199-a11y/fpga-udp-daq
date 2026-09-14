@@ -22,6 +22,9 @@ module packetizer_tb;
     logic                    payload_ready;
     logic [DATA_WIDTH-1:0]   payload_data;
     logic                    payload_last;
+    logic                    checksum_valid;
+    logic                    checksum_ready;
+    logic [15:0]             checksum_data;
     logic                    packet_done;
     logic                    busy;
 
@@ -55,6 +58,9 @@ module packetizer_tb;
         .payload_ready       (payload_ready),
         .payload_data        (payload_data),
         .payload_last        (payload_last),
+        .checksum_valid      (checksum_valid),
+        .checksum_ready      (checksum_ready),
+        .checksum_data       (checksum_data),
         .packet_done         (packet_done),
         .busy                (busy)
     );
@@ -69,6 +75,21 @@ module packetizer_tb;
             @(posedge clk);
             #1;
             fifo_wr_en = 1'b0;
+        end
+    endtask
+
+    task automatic expect_checksum(input logic [15:0] expected_checksum);
+        begin
+            while (1) begin
+                @(posedge clk);
+                if (checksum_valid && checksum_ready) begin
+                    if (checksum_data !== expected_checksum) begin
+                        $fatal(1, "Checksum mismatch: expected 0x%04h, got 0x%04h",
+                               expected_checksum, checksum_data);
+                    end
+                    disable expect_checksum;
+                end
+            end
         end
     endtask
 
@@ -101,6 +122,7 @@ module packetizer_tb;
         fifo_wr_en          = 1'b0;
         fifo_din            = '0;
         payload_ready       = 1'b0;
+        checksum_ready      = 1'b0;
 
         repeat (2) @(posedge clk);
         #1;
@@ -111,7 +133,7 @@ module packetizer_tb;
         fifo_write(16'h1000);
         fifo_write(16'h1001);
         fifo_write(16'h1002);
-        fifo_write(16'h1003);
+        fifo_write(16'h1004);
 
         // Backpressure must hold the first payload sample stable.
         while (!payload_valid) @(negedge clk);
@@ -130,7 +152,19 @@ module packetizer_tb;
         expect_payload(16'h1000, 1'b0);
         expect_payload(16'h1001, 1'b0);
         expect_payload(16'h1002, 1'b0);
-        expect_payload(16'h1003, 1'b1);
+        expect_payload(16'h1004, 1'b1);
+
+        // The checksum is a separate valid/ready beat after the last sample.
+        repeat (2) begin
+            @(negedge clk);
+            if (!checksum_valid || checksum_data !== 16'h0007) begin
+                $fatal(1, "Checksum changed while ready was low");
+            end
+        end
+
+        @(negedge clk);
+        checksum_ready = 1'b1;
+        expect_checksum(16'h0007);
 
         @(negedge clk);
         if (!packet_done || busy) begin

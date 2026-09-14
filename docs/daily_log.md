@@ -13,6 +13,7 @@
 | Day 7 | 复盘前 6 天内容；核对 FIFO、采样器和控制寄存器的接口；编写 `docs/spec_v1.md`，统一模块、时钟复位、采样格式、寄存器和异常策略。 | 将尚未实现的 packetizer、顶层集成、CDC 和真实硬件明确列为后续范围，避免 v1 规格与当前 RTL 能力混淆。 |
 | Day 8 | 学习有限状态机和状态转移；实现固定长度 payload packetizer；处理 FIFO 同步读延迟、payload `valid/ready` 背压和 `payload_last`；完成 packetizer smoke test。 | FIFO 是同步读出，不能在发出读请求的同一时刻直接使用新数据，因此增加 `ST_READ_CAPTURE` 状态；payload 端未 ready 时保持数据和 last 不变。Verilator 首次同时检查两个 RTL 文件时报告 `MULTITOP`，改用 `--top-module packetizer` 后通过。 |
 | Day 9 | 学习帧头、魔数、帧序号、长度字段和校验字段；定义 `DAQ1` 应用帧格式、16-byte header、16-bit 样本 payload 和 XOR16 checksum；完成 `docs/packet_format.md`。 | 需要在网络字节序、字段长度和校验范围之间做明确约定；v1 统一使用大端多字节字段，`payload_length` 以字节计，checksum 只覆盖采样 payload。 |
+| Day 10 | 学习 checksum/CRC 的工程意义；在 packetizer 中增加 payload XOR16 累加和独立 checksum 握手；验证输入停止后仍能输出完整 payload 与 checksum。 | checksum 必须在最后一个 payload 被真正接收时计算，不能在 payload 被 backpressure 时重复累加；因此在末 beat 使用 `checksum_accum ^ payload_data` 锁存最终值，并等待 `checksum_ready` 后再报告 `packet_done`。 |
 
 ## Day 3 设计约定
 

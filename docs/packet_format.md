@@ -138,4 +138,4 @@ total_length    = 530 bytes
 
 ## 9. 与当前 RTL 的关系
 
-Day 8 的 `packetizer.sv` 当前只输出固定长度的 payload 样本流，尚未输出本格式的帧头、序号和 checksum。Day 10 将在此格式基础上加入 XOR checksum，后续再扩展帧头和完整 UDP 发送路径。
+Day 10 的 `packetizer.sv` 已在最后一个 payload beat 后输出 XOR16 checksum，并通过独立的 `checksum_valid/checksum_ready` 握手传输。帧头、序号和完整 UDP 发送路径仍属于后续工作。

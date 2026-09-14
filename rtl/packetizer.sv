@@ -1,9 +1,9 @@
 // Fixed-length FIFO payload packetizer.
 //
 // This version groups a configured number of FIFO samples into a payload
-// stream. Frame headers, sequence numbers and checksums are intentionally
-// left for the next day. The FSM accounts for the synchronous read latency
-// of sync_fifo: READ_REQ -> READ_CAPTURE -> PAYLOAD.
+// stream and emits a 16-bit XOR checksum after the final payload beat.
+// Frame headers and sequence numbers are left for a later version. The FSM
+// accounts for the synchronous read latency of sync_fifo.
 module packetizer #(
     parameter integer DATA_WIDTH  = 16,
     parameter integer COUNT_WIDTH = 16
@@ -21,20 +21,25 @@ module packetizer #(
     input  logic                    payload_ready,
     output logic [DATA_WIDTH-1:0]   payload_data,
     output logic                    payload_last,
+    output logic                    checksum_valid,
+    input  logic                    checksum_ready,
+    output logic [15:0]             checksum_data,
     output logic                    packet_done,
     output logic                    busy
 );
 
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         ST_IDLE,
         ST_READ_REQ,
         ST_READ_CAPTURE,
-        ST_PAYLOAD
+        ST_PAYLOAD,
+        ST_CHECKSUM
     } state_t;
 
     state_t state;
     logic [COUNT_WIDTH-1:0] sample_index;
     logic [COUNT_WIDTH-1:0] packet_length;
+    logic [15:0] checksum_accum;
 
     assign fifo_rd_en = (state == ST_READ_REQ) && enable && !fifo_empty;
     assign busy       = (state != ST_IDLE);
@@ -47,6 +52,9 @@ module packetizer #(
             payload_valid <= 1'b0;
             payload_data  <= '0;
             payload_last  <= 1'b0;
+            checksum_valid <= 1'b0;
+            checksum_data  <= 16'h0000;
+            checksum_accum <= 16'h0000;
             packet_done   <= 1'b0;
         end else begin
             packet_done <= 1'b0;
@@ -59,6 +67,7 @@ module packetizer #(
                     if (enable && (samples_per_packet != '0) && !fifo_empty) begin
                         packet_length <= samples_per_packet;
                         sample_index  <= '0;
+                        checksum_accum <= 16'h0000;
                         state         <= ST_READ_REQ;
                     end
                 end
@@ -85,11 +94,13 @@ module packetizer #(
                 ST_PAYLOAD: begin
                     if (payload_valid && payload_ready) begin
                         payload_valid <= 1'b0;
+                        checksum_accum <= checksum_accum ^ payload_data;
 
                         if (payload_last) begin
                             sample_index <= '0;
-                            packet_done  <= 1'b1;
-                            state        <= ST_IDLE;
+                            checksum_data  <= checksum_accum ^ payload_data;
+                            checksum_valid <= 1'b1;
+                            state          <= ST_CHECKSUM;
                         end else begin
                             sample_index <= sample_index + 1'b1;
                             state        <= ST_READ_REQ;
@@ -97,10 +108,20 @@ module packetizer #(
                     end
                 end
 
+                ST_CHECKSUM: begin
+                    // Hold checksum_data stable until the receiver accepts it.
+                    if (checksum_valid && checksum_ready) begin
+                        checksum_valid <= 1'b0;
+                        packet_done    <= 1'b1;
+                        state          <= ST_IDLE;
+                    end
+                end
+
                 default: begin
                     state         <= ST_IDLE;
                     payload_valid <= 1'b0;
                     payload_last  <= 1'b0;
+                    checksum_valid <= 1'b0;
                 end
             endcase
         end
