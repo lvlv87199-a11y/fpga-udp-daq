@@ -166,6 +166,12 @@ Day 23 Vivado 时钟约束与综合：
 [`vivado/run_synthesis.tcl`](vivado/run_synthesis.tcl) 生成资源利用率报告；结果
 记录见 [`docs/resource_utilization_synth.md`](docs/resource_utilization_synth.md)。
 
+Day 24 Vivado Implementation 与时序基线：
+
+运行 [`vivado/run_implementation.tcl`](vivado/run_implementation.tcl) 到
+`route_design`，记录 WNS、TNS、关键路径和实现后资源；摘要见
+[`docs/timing_baseline.md`](docs/timing_baseline.md)。本日不生成 bitstream。
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -195,4 +201,5 @@ Day 23 Vivado 时钟约束与综合：
 - [x] Day 21：仿真阶段集成报告与 `v0.2-sim` 标签
 - [x] Day 22：Vivado RTL Project 创建脚本与源文件导入说明
 - [x] Day 23：100 MHz XDC 时钟约束、Vivado Synthesis 与资源报告
-- [ ] Day 24 及以后：Implementation、WNS/TNS 与时序分析
+- [x] Day 24：Implementation、WNS/TNS、关键路径与时序基线
+- [ ] Day 25 及以后：RTL 时序优化与 PPA 对比

@@ -27,6 +27,7 @@
 | Day 21 | 完成仿真阶段集成复盘；编写 `docs/integration_report.md`，整理系统框图、主要 VCD 波形、测试通过率和已知限制；运行完整回归。 | 4/4 SystemVerilog smoke、6/6 Cocotb 用例、Python 参考模型、吞吐率自测和 Verilator lint 均通过；测试计划为 11 个可执行项 100% 通过，P09 因 packetizer 尚无帧头/序号接口保持 BLOCKED。创建阶段标签 `v0.2-sim`；按要求未新增统一 `daq_top` 波形。 |
 | Day 22 | 检查 Windows Vivado 2017.4；编写可复现的 RTL Project Tcl 脚本和操作说明，查询器件库，导入 5 个 RTL 源文件并设置 `daq_top` 为顶层。 | Vivado 安装在 `D:\apps\vivado\Vivado\2017.4`；确认 `xc7a100tcsg324-1` 已安装并成功生成 `vivado/daq_top_project/fpga_udp_daq.xpr`。本日不添加 XDC、不做综合和实现。 |
 | Day 23 | 编写 `vivado/daq_top.xdc`，将顶层 `clk` 约束为 100 MHz；把约束加入工程并运行 Vivado Synthesis，保存资源利用率报告。 | 使用 `xc7a100tcsg324-1`；综合成功（0 errors、0 critical warnings）：LUT 230/63400（0.36%）、FF 329/126800（0.26%）、BRAM 0、DSP 0、IOB 121/210（57.62%）。综合结果记录在 `docs/resource_utilization_synth.md` 和 `vivado/reports/`；Implementation、WNS/TNS 和关键路径分析留到 Day24。 |
+| Day 24 | 学习 setup/hold slack、WNS/TNS 和关键路径；运行 Vivado Implementation 到 `route_design`；保存时序摘要、关键路径和实现后资源报告。 | 使用 100 MHz `sys_clk` 约束；setup WNS/TNS 为 `+4.893 ns / 0`，hold WHS/THS 为 `+0.081 ns / 0`，最差 setup 路径是 packetizer 包长计数到 `payload_last`。实现后 LUT 229、FF 346、BRAM 0、DSP 0；结果记录在 `docs/timing_baseline.md` 和 `vivado/reports/`。本日不生成 bitstream，I/O delay 约束留待后续。 |
 
 ## Day 3 设计约定
 

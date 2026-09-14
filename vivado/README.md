@@ -70,17 +70,29 @@ D:\apps\vivado\Vivado\2017.4\bin\vivado.bat -mode batch -nolog -nojournal -notra
 `vivado/reports/utilization_synth_flat.rpt`。本日只执行 Synthesis，Implementation
 和 WNS/TNS 时序分析留到后续 Day24。
 
+## 4. Day24 Implementation 与时序基线
+
+运行 Implementation 到 `route_design`，并生成 WNS/TNS、关键路径和实现后资源
+报告：
+
+```powershell
+D:\apps\vivado\Vivado\2017.4\bin\vivado.bat -mode batch -nolog -nojournal -notrace -source D:\mywork\fpga-udp-daq\vivado\run_implementation.tcl
+```
+
+结果文件位于 `vivado/reports/`，摘要见
+[`docs/timing_baseline.md`](../docs/timing_baseline.md)。本日不生成 bitstream。
+
 如果工程目录已经存在，脚本默认停止以避免覆盖；确认需要重建时才使用：
 
 ```powershell
 ... -tclargs <installed_part> --force
 ```
 
-## 3. GUI 中确认
+## 5. GUI 中确认
 
 双击生成的 `.xpr`，在 Sources 面板确认：
 
 1. 5 个 `.sv` 文件位于 Design Sources；
 2. `daq_top` 显示为 Top Module；
 3. Project Settings → General 中的 Part 与查询结果一致；
-4. 本日不需要添加 XDC，Day23 再加入时钟约束。
+4. Day22 创建项目时不需要添加 XDC；Day23 已通过脚本加入 `daq_top.xdc` 时钟约束。

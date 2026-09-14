@@ -9,7 +9,7 @@
 | Top module | `daq_top` |
 | Clock constraint | `sys_clk`，10.000 ns，100 MHz |
 | Synthesis | 成功，0 errors，0 critical warnings |
-| Implementation | 本日未执行 |
+| Implementation | Day24 已完成至 `route_design`，详见 [`timing_baseline.md`](timing_baseline.md) |
 
 原始报告：
 
@@ -48,7 +48,7 @@
 - 统计计数器、FIFO `count` 等部分寄存器在当前顶层可观察路径下被综合优化提示；
 - 小型 FIFO 使用 distributed RAM，而没有映射到 Block RAM。
 
-这些告警没有阻止综合完成，但在后续 Day24/Day26 资源和时序分析中需要区分
+这些告警没有阻止综合完成，但在后续 Day26 资源和时序分析中需要区分
 “接口设计导致的提示”和真正的时序/功能问题。
 
 ## 5. 可复现命令
