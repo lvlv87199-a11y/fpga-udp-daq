@@ -92,6 +92,13 @@ bash sim/run_fifo_cocotb.sh
 
 该命令同时运行基础 FIFO 测试和 Day 12 随机 scoreboard 测试，后者执行 2,000 个确定性伪随机时钟周期，并主动覆盖空读、满写和并行读写。
 
+Day 13 参考帧模型：
+
+```bash
+python3 scripts/reference_packet.py --self-test
+python3 scripts/reference_packet.py --frame-seq 7 0x1234 0xabcd
+```
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -110,4 +117,5 @@ bash sim/run_fifo_cocotb.sh
 - [x] Day 10：packetizer XOR checksum
 - [x] Day 11：cocotb FIFO 协程测试
 - [x] Day 12：FIFO 随机读写与参考队列检查
-- [ ] Day 13 及以后：参考模型、测试计划与 Vivado 分析
+- [x] Day 13：Python DAQ 帧参考模型
+- [ ] Day 14 及以后：测试计划与 Vivado 分析

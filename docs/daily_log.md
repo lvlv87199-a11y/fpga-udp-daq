@@ -16,6 +16,7 @@
 | Day 10 | 学习 checksum/CRC 的工程意义；在 packetizer 中增加 payload XOR16 累加和独立 checksum 握手；验证输入停止后仍能输出完整 payload 与 checksum。 | checksum 必须在最后一个 payload 被真正接收时计算，不能在 payload 被 backpressure 时重复累加；因此在末 beat 使用 `checksum_accum ^ payload_data` 锁存最终值，并等待 `checksum_ready` 后再报告 `packet_done`。 |
 | Day 11 | 学习 cocotb 的协程、驱动器、监视器和断言；安装 cocotb 并为 `sync_fifo` 编写第一个 Python 测试。 | 系统 Python 最初没有 pip，需要先补齐 WSL 的 `python3-pip`；测试直接驱动 RTL 顶层端口，并用协程封装写入、读出和状态检查。`bash sim/run_fifo_cocotb.sh` 已通过。 |
 | Day 12 | 学习随机测试和参考模型；用 Python `deque` 模拟 FIFO，逐周期随机驱动读写并比较 `dout/full/empty/overflow`。 | 需要按时钟沿之前的 FIFO 状态判断读写是否真正被接受；满时写入被拒绝但同周期读出仍可发生，空时读出被忽略但同周期写入仍可发生。最终测试包含 2,000 个确定性随机周期，记录到 103 次空读、174 次满写溢出、1,013 次有效读和 1,013 次有效写。 |
+| Day 13 | 学习 scoreboard/reference model；实现 `scripts/reference_packet.py`，根据样本生成 DAQ v1 应用帧，并提供帧解析与校验自检。 | 用 `struct` 固定大端字段布局，明确样本值、样本数、序号和 flags 的范围；自检验证 `DAQ1` 帧头、样本字节序和 `0x1234 ^ 0xabcd = 0xb9f9`。 |
 
 ## Day 3 设计约定
 
