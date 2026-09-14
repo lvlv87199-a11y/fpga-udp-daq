@@ -21,6 +21,7 @@
 | Day 15 | 学习顶层集成与接口分层；实现 `rtl/daq_top.sv`，连接 `daq_ctrl`、`sample_generator`、`sync_fifo` 和 `packetizer`；通过寄存器配置真实数据链路。 | 顶层用 `!fifo_full` 生成采样器 ready，避免正常数据路径向满 FIFO 发起写入；新增 cocotb 集成测试，验证配置后连续输出 0–7 两个 4-sample packet。 |
 | Day 16 | 学习事件计数器、计数器回绕和复位恢复；增加样本数、发送帧数、FIFO overflow 数和 checksum 错误数四个 32-bit 只读统计寄存器。 | `sample_event`、`frame_event` 和 `checksum_error_event` 作为事件输入，计数器同步复位并自然回绕；顶层把 FIFO 写入和 `packet_done` 接到对应统计事件，checksum 错误保留为外部输入。 |
 | Day 17 | 学习 ready/valid backpressure；新增随机拉低 `payload_ready`/`checksum_ready` 的顶层测试，并记录 FIFO 最大水位。 | 采用固定随机种子验证 64 个连续样本和 8 个 packet；新增 `sync_fifo.level`/`daq_top.fifo_level` 只读观测信号，不改变 FIFO 读写语义。测试通过：最大水位 8、payload 背压 46 次、checksum 背压 3 次、FIFO overflow 0。 |
+| Day 18 | 学习时钟域跨越风险和异步 FIFO 原理；编写 `docs/cdc_note.md`，说明 ADC 时钟与系统时钟不同时时钟域、指针、复位和状态信号的处理方式。 | 本日按计划不实现异步 FIFO；明确使用 Gray 指针、双触发器同步、双口 RAM 和各域本地 `full/empty`，并列出后续 CDC 验证项目。 |
 
 ## Day 3 设计约定
 

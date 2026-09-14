@@ -127,6 +127,8 @@ Day 17 随机背压测试：
 bash sim/run_backpressure_cocotb.sh
 ```
 
+Day 18 CDC 设计说明见 [`docs/cdc_note.md`](docs/cdc_note.md)。本日不实现异步 FIFO。
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -150,4 +152,5 @@ bash sim/run_backpressure_cocotb.sh
 - [x] Day 15：daq_top 单时钟链路集成
 - [x] Day 16：样本/帧/溢出/checksum 错误统计寄存器
 - [x] Day 17：随机 ready 背压与 FIFO 最大水位
-- [ ] Day 18 及以后：CDC 与 Vivado 分析
+- [x] Day 18：ADC 时钟域与系统时钟域 CDC 说明
+- [ ] Day 19 及以后：带宽分析与 Vivado 分析
