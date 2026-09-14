@@ -84,6 +84,12 @@ bash sim/run_packetizer_tb.sh
 
 Day 10 的 checksum 已包含在 packetizer smoke test 中，最后一个 payload 后会额外检查 XOR16 输出。
 
+Day 11 cocotb FIFO 测试：
+
+```bash
+bash sim/run_fifo_cocotb.sh
+```
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -100,4 +106,5 @@ Day 10 的 checksum 已包含在 packetizer smoke test 中，最后一个 payloa
 - [x] Day 8：固定长度 payload packetizer FSM
 - [x] Day 9：DAQ UDP 应用帧格式
 - [x] Day 10：packetizer XOR checksum
-- [ ] Day 11 及以后：RTL、自动化验证与 Vivado 分析
+- [x] Day 11：cocotb FIFO 协程测试
+- [ ] Day 12 及以后：随机测试、参考模型与 Vivado 分析

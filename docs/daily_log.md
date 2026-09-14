@@ -14,6 +14,7 @@
 | Day 8 | 学习有限状态机和状态转移；实现固定长度 payload packetizer；处理 FIFO 同步读延迟、payload `valid/ready` 背压和 `payload_last`；完成 packetizer smoke test。 | FIFO 是同步读出，不能在发出读请求的同一时刻直接使用新数据，因此增加 `ST_READ_CAPTURE` 状态；payload 端未 ready 时保持数据和 last 不变。Verilator 首次同时检查两个 RTL 文件时报告 `MULTITOP`，改用 `--top-module packetizer` 后通过。 |
 | Day 9 | 学习帧头、魔数、帧序号、长度字段和校验字段；定义 `DAQ1` 应用帧格式、16-byte header、16-bit 样本 payload 和 XOR16 checksum；完成 `docs/packet_format.md`。 | 需要在网络字节序、字段长度和校验范围之间做明确约定；v1 统一使用大端多字节字段，`payload_length` 以字节计，checksum 只覆盖采样 payload。 |
 | Day 10 | 学习 checksum/CRC 的工程意义；在 packetizer 中增加 payload XOR16 累加和独立 checksum 握手；验证输入停止后仍能输出完整 payload 与 checksum。 | checksum 必须在最后一个 payload 被真正接收时计算，不能在 payload 被 backpressure 时重复累加；因此在末 beat 使用 `checksum_accum ^ payload_data` 锁存最终值，并等待 `checksum_ready` 后再报告 `packet_done`。 |
+| Day 11 | 学习 cocotb 的协程、驱动器、监视器和断言；安装 cocotb 并为 `sync_fifo` 编写第一个 Python 测试。 | 系统 Python 最初没有 pip，需要先补齐 WSL 的 `python3-pip`；测试直接驱动 RTL 顶层端口，并用协程封装写入、读出和状态检查。`bash sim/run_fifo_cocotb.sh` 已通过。 |
 
 ## Day 3 设计约定
 
