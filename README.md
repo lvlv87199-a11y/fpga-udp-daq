@@ -108,6 +108,12 @@ python3 scripts/reference_packet.py --self-test
 
 测试矩阵见 [`docs/testplan.md`](docs/testplan.md)。当前 packetizer 尚未输出帧头和 `frame_seq`，该项暂由参考模型验证，RTL 接口集成后补测。
 
+Day 15 顶层集成测试：
+
+```bash
+bash sim/run_daq_top_cocotb.sh
+```
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -128,4 +134,5 @@ python3 scripts/reference_packet.py --self-test
 - [x] Day 12：FIFO 随机读写与参考队列检查
 - [x] Day 13：Python DAQ 帧参考模型
 - [x] Day 14：packetizer cocotb 覆盖矩阵
-- [ ] Day 15 及以后：顶层集成、测试计划扩展与 Vivado 分析
+- [x] Day 15：daq_top 单时钟链路集成
+- [ ] Day 16 及以后：统计计数、压力测试与 Vivado 分析

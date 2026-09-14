@@ -7,8 +7,10 @@
 - `sample_generator`：产生递增采样数据，并提供 `valid/ready` 数据流接口。
 - `sync_fifo`：单时钟同步 FIFO，负责暂存采样数据和报告满时写入失败。
 - `daq_ctrl`：提供简单的控制/状态寄存器接口。
+- `packetizer`：将 FIFO 样本组成固定长度 payload，并输出 XOR16 checksum。
+- `daq_top`：在单一时钟域中连接上述模块，向外提供控制寄存器和 payload/checksum 流接口。
 
-UDP packetizer、顶层集成、真实 ADC、以太网 PHY 和跨时钟域逻辑属于后续版本。
+完整 UDP 传输头、真实 ADC、以太网 PHY 和跨时钟域逻辑属于后续版本。
 
 ## 2. 系统模块图
 
@@ -22,14 +24,14 @@ UDP packetizer、顶层集成、真实 ADC、以太网 PHY 和跨时钟域逻辑
                                  v
 +------------------+      +-----+------+      +------------------+
 | sample_generator |      |  sync_fifo  |      |   packetizer     |
-| 16-bit increment |----->| buffer/data |----->| future module    |
-| valid/ready      |      | full/empty  |      | UDP frame output |
+| 16-bit increment |----->| buffer/data |----->| payload/checksum |
+| valid/ready      |      | full/empty  |      | stream output    |
 +------------------+      +-----+------+      +------------------+
                                   |
                                   +---- fifo_full/overflow ----> daq_ctrl
 ```
 
-在当前版本中，采样器和 FIFO 仍可独立仿真，尚未由 `daq_top` 连接成完整系统。
+当前版本已由 `daq_top` 在单一时钟域中连接采样器、FIFO、控制寄存器和 packetizer；UDP 传输头和真实硬件仍不在范围内。
 
 ## 3. 模块功能
 
@@ -119,8 +121,8 @@ UDP packetizer、顶层集成、真实 ADC、以太网 PHY 和跨时钟域逻辑
 
 ## 9. 当前限制与后续工作
 
-- 尚未实现 `daq_top` 顶层集成。
-- 尚未实现 packetizer、UDP 帧格式和 checksum。
+- `daq_top` 已完成单时钟顶层集成；统计计数器和 UDP 发送模块仍未实现。
+- packetizer 当前输出 payload/checksum 流，完整 UDP 应用帧头和 `frame_seq` 仍由后续模块负责。
 - 尚未加入跨时钟域异步 FIFO。
 - 尚未进行 Vivado 综合、实现、时序和资源分析。
 - 尚未连接真实 ADC、PHY 或开发板。

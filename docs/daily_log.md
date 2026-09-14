@@ -18,6 +18,7 @@
 | Day 12 | 学习随机测试和参考模型；用 Python `deque` 模拟 FIFO，逐周期随机驱动读写并比较 `dout/full/empty/overflow`。 | 需要按时钟沿之前的 FIFO 状态判断读写是否真正被接受；满时写入被拒绝但同周期读出仍可发生，空时读出被忽略但同周期写入仍可发生。最终测试包含 2,000 个确定性随机周期，记录到 103 次空读、174 次满写溢出、1,013 次有效读和 1,013 次有效写。 |
 | Day 13 | 学习 scoreboard/reference model；实现 `scripts/reference_packet.py`，根据样本生成 DAQ v1 应用帧，并提供帧解析与校验自检。 | 用 `struct` 固定大端字段布局，明确样本值、样本数、序号和 flags 的范围；自检验证 `DAQ1` 帧头、样本字节序和 `0x1234 ^ 0xabcd = 0xb9f9`。 |
 | Day 14 | 学习测试覆盖矩阵；为 packetizer 编写 cocotb 覆盖测试，验证包长、payload 顺序、`payload_last`、背压、checksum 和不完整尾包等待策略；新增 `docs/testplan.md`。 | 当前 packetizer 还没有帧头/`frame_seq` 端口，因此帧序号先由 Day 13 参考模型验证，并在测试计划中明确列为 RTL 后续接口项。 |
+| Day 15 | 学习顶层集成与接口分层；实现 `rtl/daq_top.sv`，连接 `daq_ctrl`、`sample_generator`、`sync_fifo` 和 `packetizer`；通过寄存器配置真实数据链路。 | 顶层用 `!fifo_full` 生成采样器 ready，避免正常数据路径向满 FIFO 发起写入；新增 cocotb 集成测试，验证配置后连续输出 0–7 两个 4-sample packet。 |
 
 ## Day 3 设计约定
 
