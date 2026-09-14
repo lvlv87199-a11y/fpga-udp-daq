@@ -5,6 +5,17 @@ sim/build/
 *.lxt
 *.vvp
 
+# Vivado generated project state; keep the reproducible .xpr and Tcl script.
+vivado/daq_top_project/*.cache/
+vivado/daq_top_project/*.hw/
+vivado/daq_top_project/*.ip_user_files/
+vivado/daq_top_project/*.runs/
+vivado/daq_top_project/*.gen/
+vivado/daq_top_project/*.sim/
+vivado/daq_top_project/*.srcs/
+vivado/daq_top_project/*.jou
+vivado/daq_top_project/*.log
+
 # Python test cache
 __pycache__/
 *.pyc
