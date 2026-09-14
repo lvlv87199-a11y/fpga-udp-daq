@@ -1,0 +1,113 @@
+`timescale 1ns/1ps
+
+module daq_ctrl_tb;
+
+    logic        clk;
+    logic        rst_n;
+    logic        wr_en;
+    logic        rd_en;
+    logic [7:0]  addr;
+    logic [31:0] wdata;
+    logic [31:0] rdata;
+    logic        rd_valid;
+    logic        enable;
+    logic [15:0] sample_divider;
+    logic [15:0] samples_per_packet;
+    logic        fifo_full;
+    logic        fifo_overflow;
+
+    daq_ctrl dut (
+        .clk                (clk),
+        .rst_n              (rst_n),
+        .wr_en              (wr_en),
+        .rd_en              (rd_en),
+        .addr               (addr),
+        .wdata              (wdata),
+        .rdata              (rdata),
+        .rd_valid           (rd_valid),
+        .enable             (enable),
+        .sample_divider     (sample_divider),
+        .samples_per_packet (samples_per_packet),
+        .fifo_full          (fifo_full),
+        .fifo_overflow      (fifo_overflow)
+    );
+
+    always #5 clk = ~clk;
+
+    task automatic write_reg(input logic [7:0] wr_addr, input logic [31:0] value);
+        begin
+            @(negedge clk);
+            addr  = wr_addr;
+            wdata = value;
+            wr_en = 1'b1;
+            @(posedge clk);
+            #1;
+            wr_en = 1'b0;
+        end
+    endtask
+
+    task automatic read_reg(input logic [7:0] rd_addr, input logic [31:0] expected);
+        begin
+            @(negedge clk);
+            addr  = rd_addr;
+            rd_en = 1'b1;
+            @(posedge clk);
+            #1;
+            rd_en = 1'b0;
+            if (rd_valid !== 1'b1 || rdata !== expected) begin
+                $fatal(1, "Read mismatch at 0x%02h: expected 0x%08h, got 0x%08h (valid=%b)",
+                       rd_addr, expected, rdata, rd_valid);
+            end
+        end
+    endtask
+
+    initial begin
+        clk           = 1'b0;
+        rst_n         = 1'b0;
+        wr_en         = 1'b0;
+        rd_en         = 1'b0;
+        addr          = '0;
+        wdata         = '0;
+        fifo_full     = 1'b0;
+        fifo_overflow = 1'b0;
+
+        repeat (2) @(posedge clk);
+        #1;
+        if (enable !== 1'b0 || sample_divider !== 16'd0 ||
+            samples_per_packet !== 16'd256 || rd_valid !== 1'b0) begin
+            $fatal(1, "Reset defaults are invalid");
+        end
+
+        @(negedge clk);
+        rst_n = 1'b1;
+
+        write_reg(8'h00, 32'h1);
+        write_reg(8'h04, 32'd7);
+        write_reg(8'h08, 32'd512);
+
+        if (enable !== 1'b1 || sample_divider !== 16'd7 ||
+            samples_per_packet !== 16'd512) begin
+            $fatal(1, "Control writes did not update outputs");
+        end
+
+        read_reg(8'h00, 32'h1);
+        read_reg(8'h04, 32'd7);
+        read_reg(8'h08, 32'd512);
+
+        fifo_full     = 1'b1;
+        fifo_overflow = 1'b1;
+        read_reg(8'h0c, 32'h7);
+
+        // A zero packet length must be ignored.
+        write_reg(8'h08, 32'd0);
+        if (samples_per_packet !== 16'd512) begin
+            $fatal(1, "Zero packet length was not rejected");
+        end
+
+        read_reg(8'hfc, 32'd0);
+
+        $display("PASS: daq_ctrl register read/write/status checks");
+        $finish;
+    end
+
+endmodule

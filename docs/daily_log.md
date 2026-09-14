@@ -9,6 +9,7 @@
 | Day 3 | 学习 FIFO 的深度、满/空、读写握手和溢出处理；实现参数化单时钟同步 FIFO；完成 Icarus 编译和 Verilator lint。 | 规格没有预先规定复位和溢出语义，因此约定使用同步低有效复位、同步读出，并将满时被拒绝的写请求报告为一个时钟周期的 `overflow` 脉冲。首次编译时 Icarus 11 对 `parameter int unsigned` 声明报语法错误，改为 `parameter integer`；Verilator 的位宽警告则通过显式的指针末值和深度常量修正。 |
 | Day 4 | 编写最小 SystemVerilog testbench；验证复位、空读、连续写入、满状态、溢出脉冲、顺序读取和复位恢复；生成并分析 VCD。 | 当前测试没有阻塞问题；波形查看依赖 WSLg 或可用的图形显示环境，VCD 文件本身已由仿真生成。 |
 | Day 5 | 学习 `valid/ready` 数据流握手；实现 16-bit 参数化递增采样器；支持 `enable` 和可配置分频；完成 Icarus 编译、Verilator lint 和 smoke test。 | 需要明确 `enable` 与握手的关系：当一个样本已经 `valid` 时，即使 `enable` 拉低，也必须保持该样本直到 `ready` 接收，避免违反 valid/ready 协议。 |
+| Day 6 | 学习寄存器映射和 FPGA 外设控制；实现 `daq_ctrl` 自定义读写接口、控制寄存器和状态寄存器；完成 Icarus 编译、Verilator lint 和寄存器 smoke test。 | 为避免过早引入 AXI，先规定单周期 `wr_en/rd_en` 接口；同时明确读响应为注册输出 `rd_valid`，未映射地址读回 0，零包长写入被忽略。 |
 
 ## Day 3 设计约定
 

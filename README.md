@@ -68,6 +68,12 @@ Day 5 采样器 smoke test：
 bash sim/run_sample_generator_tb.sh
 ```
 
+Day 6 控制寄存器 smoke test：
+
+```bash
+bash sim/run_daq_ctrl_tb.sh
+```
+
 ## 当前范围
 
 项目先以仿真和 Vivado 分析为主，不要求真实 ADC、以太网 PHY、开发板或 PCB 打样。LiteX/LiteEth 与单板硬件属于后续可选扩展。
@@ -79,4 +85,5 @@ bash sim/run_sample_generator_tb.sh
 - [x] Day 3：参数化同步 FIFO RTL
 - [x] Day 4：FIFO 最小 testbench 与 VCD 波形
 - [x] Day 5：valid/ready 递增采样器
-- [ ] Day 6 及以后：RTL、自动化验证与 Vivado 分析
+- [x] Day 6：自定义 DAQ 控制/状态寄存器接口
+- [ ] Day 7 及以后：RTL、自动化验证与 Vivado 分析
